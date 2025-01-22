@@ -1,6 +1,5 @@
 package edu.hhn.todoapp_sqllite.ui.screens
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,23 +18,31 @@ import edu.hhn.todoapp_sqllite.data.TodoController
 import edu.hhn.todoapp_sqllite.domain.validation.TodoValidation
 import edu.hhn.todoapp_sqllite.viewmodel.TodoViewModel
 
-
+/**
+ * Composable function for the Todo Dashboard screen.
+ *
+ * Displays a tabbed interface for managing active and completed todos,
+ * and provides a floating action button for adding new todos.
+ *
+ * @param viewModel The [TodoViewModel] that manages the todo data and operations.
+ */
 @Composable
 fun TodoDashboard(viewModel: TodoViewModel) {
-    var selectedTabIndex by remember { mutableStateOf(0) } // 0 für Aktive, 1 für Erledigte
+    var selectedTabIndex by remember { mutableStateOf(0) } // 0 for Active, 1 for Completed
     var isEditDialogVisible by remember { mutableStateOf(false) }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     val context = LocalContext.current
     val todoController = TodoController(context)
     val todos = remember { mutableStateListOf<Todo>() }
 
+    // Load todos from the database
     LaunchedEffect(Unit) {
         todos.clear()
         todos.addAll(todoController.getTodos())
     }
 
     Column {
-        // TabRow für die Navigation
+        // Tab navigation for Active and Completed todos
         TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.fillMaxWidth()) {
             Tab(
                 selected = selectedTabIndex == 0,
@@ -49,29 +56,29 @@ fun TodoDashboard(viewModel: TodoViewModel) {
             )
         }
 
-        // LazyColumn um die ToDos anzuzeigen
+        // Display the list of todos based on the selected tab
         LazyColumn {
             val filteredTodos = if (selectedTabIndex == 0) {
-                viewModel.todos.filter { !it.isCompleted } // Nur offene ToDos
+                viewModel.todos.filter { !it.isCompleted } // Active todos
             } else {
-                viewModel.todos.filter { it.isCompleted } // Nur erledigte ToDos
+                viewModel.todos.filter { it.isCompleted } // Completed todos
             }
 
             items(filteredTodos) { todo ->
                 TodoCard(
                     todo = todo,
                     onDelete = { viewModel.deleteTodo(it) },
-                    onEdit = { todoToEdit = it; isEditDialogVisible = true }, // Editieren eines ToDos
+                    onEdit = { todoToEdit = it; isEditDialogVisible = true },
                     onToggleStatus = { viewModel.toggleTodoStatus(it) }
                 )
             }
         }
 
-        // FloatingActionButton für das Hinzufügen eines neuen ToDos
+        // FloatingActionButton for adding a new todo
         if (selectedTabIndex == 0) {
             FloatingActionButton(onClick = {
                 todoToEdit = Todo(
-                    id = -1, // temporäre ID, wird vom ViewModel überschrieben
+                    id = -1, // Temporary ID, updated by the ViewModel
                     name = "",
                     priority = "",
                     dueDate = "",
@@ -83,19 +90,17 @@ fun TodoDashboard(viewModel: TodoViewModel) {
             }
         }
 
-        // Zeige den Bearbeitungs-Dialog, wenn er sichtbar sein soll
+        // Display the TodoEditDialog if required
         if (isEditDialogVisible && todoToEdit != null) {
             TodoEditDialog(
                 todo = todoToEdit!!,
                 onDismiss = { isEditDialogVisible = false },
                 onSave = { updatedTodo ->
                     if (updatedTodo.id == -1) {
-                        // Neues Todo hinzufügen
                         viewModel.addTodo(
-                            updatedTodo.copy(id = (viewModel.todos.size + 1)) // ID setzen
+                            updatedTodo.copy(id = (viewModel.todos.size + 1)) // Assign an ID
                         )
                     } else {
-                        // Existierendes Todo aktualisieren
                         viewModel.updateTodo(updatedTodo)
                     }
                     isEditDialogVisible = false
@@ -105,7 +110,15 @@ fun TodoDashboard(viewModel: TodoViewModel) {
     }
 }
 
-// Der Bearbeitungsdialog für Todos
+/**
+ * Composable function for the Todo Edit Dialog.
+ *
+ * Provides a form for creating or editing todos, including validation for inputs.
+ *
+ * @param todo The [Todo] object to edit.
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param onSave Callback invoked when the user saves the todo.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoEditDialog(
@@ -120,7 +133,6 @@ fun TodoEditDialog(
     var dueDateError by remember { mutableStateOf<String?>(null) }
     var expandedPriorityMenu by remember { mutableStateOf(false) }
 
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Bearbeite ToDo") },
@@ -129,7 +141,7 @@ fun TodoEditDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Name TextField mit Counter und Error
+                // Name TextField with validation and counter
                 OutlinedTextField(
                     value = editedTodo.name,
                     onValueChange = {
@@ -152,7 +164,7 @@ fun TodoEditDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Priority Dropdown
+                // Priority dropdown
                 ExposedDropdownMenuBox(
                     expanded = expandedPriorityMenu,
                     onExpandedChange = { expandedPriorityMenu = !expandedPriorityMenu }
@@ -178,7 +190,7 @@ fun TodoEditDialog(
                                 onClick = {
                                     editedTodo = editedTodo.copy(priority = priority)
                                     priorityError = null
-                                    expandedPriorityMenu = false  // Schließe das Menü nach Auswahl
+                                    expandedPriorityMenu = false
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                             )
@@ -186,7 +198,7 @@ fun TodoEditDialog(
                     }
                 }
 
-                // Datum TextField mit Validierung
+                // Due date TextField with validation
                 OutlinedTextField(
                     value = editedTodo.dueDate,
                     onValueChange = {
@@ -201,7 +213,7 @@ fun TodoEditDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Description TextField mit Counter
+                // Description TextField with validation and counter
                 OutlinedTextField(
                     value = editedTodo.description,
                     onValueChange = {
@@ -226,7 +238,7 @@ fun TodoEditDialog(
                     maxLines = 5
                 )
 
-                // Status Switch
+                // Status switch
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -244,7 +256,6 @@ fun TodoEditDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    // Validiere alle Felder vor dem Speichern
                     val nameValidation = TodoValidation.validateName(editedTodo.name)
                     val priorityValidation = TodoValidation.validatePriority(editedTodo.priority)
                     val dueDateValidation = TodoValidation.validateDueDate(editedTodo.dueDate)
@@ -255,7 +266,6 @@ fun TodoEditDialog(
                     dueDateError = dueDateValidation.errorMessage
                     descriptionError = descriptionValidation.errorMessage
 
-                    // Nur speichern wenn alle Validierungen erfolgreich
                     if (nameValidation.isValid && priorityValidation.isValid &&
                         dueDateValidation.isValid && descriptionValidation.isValid) {
                         onSave(editedTodo)

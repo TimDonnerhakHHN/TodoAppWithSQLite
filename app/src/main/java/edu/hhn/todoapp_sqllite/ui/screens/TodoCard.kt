@@ -15,8 +15,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import edu.hhn.todoapp_sqllite.data.Todo
 
+/**
+ * Displays a card representing a single to-do item with actions for status toggle, edit, and delete.
+ *
+ * @param todo The [Todo] object containing the details to display.
+ * @param onDelete A callback function invoked when the delete button is clicked, passing the to-do ID.
+ * @param onEdit A callback function invoked when the edit button is clicked, passing the [Todo] object.
+ * @param onToggleStatus A callback function invoked when the status toggle button is clicked, passing the to-do ID.
+ */
 @Composable
-fun TodoCard(todo: Todo, onDelete: (Int) -> Unit, onEdit: (Todo) -> Unit, onToggleStatus: (Int) -> Unit) {
+fun TodoCard(
+    todo: Todo,
+    onDelete: (Int) -> Unit,
+    onEdit: (Todo) -> Unit,
+    onToggleStatus: (Int) -> Unit
+) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(todo.name, style = MaterialTheme.typography.bodyMedium)
@@ -44,4 +57,3 @@ fun TodoCard(todo: Todo, onDelete: (Int) -> Unit, onEdit: (Todo) -> Unit, onTogg
         }
     }
 }
-

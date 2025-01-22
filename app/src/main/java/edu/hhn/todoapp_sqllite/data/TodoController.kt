@@ -1,15 +1,25 @@
 package edu.hhn.todoapp_sqllite.data
 
-
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
 
-
+/**
+ * Controller class for managing CRUD operations on the `todos` table in the SQLite database.
+ *
+ * This class provides methods to retrieve, add, update, and delete todos from the database.
+ *
+ * @param context The application context for accessing the database.
+ */
 class TodoController(context: Context) {
     private val dbHelper = DbHelper(context)
     private val TAG = "TodoController"
 
+    /**
+     * Retrieves all todos from the database.
+     *
+     * @return A list of [Todo] objects retrieved from the database.
+     */
     fun getTodos(): List<Todo> {
         val todos = mutableListOf<Todo>()
         val db = dbHelper.readableDatabase
@@ -47,6 +57,11 @@ class TodoController(context: Context) {
         return todos
     }
 
+    /**
+     * Adds a new todo to the database.
+     *
+     * @param todo The [Todo] object to be added.
+     */
     fun addTodo(todo: Todo) {
         val db = dbHelper.writableDatabase
 
@@ -72,6 +87,11 @@ class TodoController(context: Context) {
         }
     }
 
+    /**
+     * Updates an existing todo in the database.
+     *
+     * @param todo The [Todo] object containing updated information.
+     */
     fun updateTodo(todo: Todo) {
         val db = dbHelper.writableDatabase
 
@@ -97,6 +117,11 @@ class TodoController(context: Context) {
         }
     }
 
+    /**
+     * Deletes a todo from the database by its ID.
+     *
+     * @param id The ID of the todo to be deleted.
+     */
     fun deleteTodo(id: Int) {
         val db = dbHelper.writableDatabase
 
