@@ -1,5 +1,6 @@
 ToDoApp
 
+Download APK: https://github.com/TimDonnerhakHHN/TodoAppWithSQLite/raw/main/app/release/app-release.apk
 
 1. Installationsanleitung
 
